@@ -74,7 +74,7 @@ for day in week_days:
 
 
 ### for consolodating the day and nights
-pd_data = {"day_tag":[],"day":[], "date":[],"high": [], "low": [], "report_tag":[], "day_report": [], "night_report": [], }
+pd_data = {"day":[], "date":[],"high": [], "low": [], "day_report": [], "night_report": [], }
 
 for day, data in groups.items():
 
@@ -99,8 +99,12 @@ for v in pd_data.values():
 
 
 ## add tags
-pd_data['day_tag'].append(['"col-sm-2 forecast-label"' for i in range(len(pd_data['day']))])
-pd_data['report_tag'].append(['"col-sm-10 forecast-text"' for i in range(len(pd_data['day']))])
+
+pd_data['day_tag'] = ['"col-sm-2 forecast-label"' for i in range(7)]
+pd_data['report_tag']=['"col-sm-10 forecast-text"' for i in range(7)]
+
+
+
 df = pd.DataFrame(pd_data)
 
 
