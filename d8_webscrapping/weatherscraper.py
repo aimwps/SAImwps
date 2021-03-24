@@ -1,46 +1,104 @@
 import requests
 from bs4 import BeautifulSoup
+import datetime as dt
+import pandas as pd
+import numpy as np
+week_days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+today_date = dt.date.today().weekday()
+today = week_days[dt.date.today().weekday()]
 
-######## To the reviewer. This is in complete. Faced some issues and it probably doesnt make sense what i'm doiing sorry !
 
+# Converts the day into a date
 
-def rp(to_print):
-    for i, line in enumerate(to_print):
-        print(f"[{i}]: {line}")
+def get_date(day):
+    day_idx = week_days.index(day)
+    today_idx = dt.date.today().weekday()
+    date = None
+    if day_idx > today_idx:
+        date = dt.date.today() + dt.timedelta(days=day_idx - today_idx)
+    elif day_idx < today_idx:
+        date = dt.date.today() + dt.timedelta(days=len(week_days[week_days.index(today):]) + day_idx)
+    else:
+        date = dt.date.today()
+    return date
+
+def get_celcius(f):
+    return int(f*(5/9))
+
 
 page = requests.get('https://forecast.weather.gov/MapClick.php?lat=37.777120000000025&lon=-122.41963999999996#.YFsuGEP7RhE')
 soup = BeautifulSoup(page.content, 'html.parser')
-content = soup.find(id="seven-day-forecast-list")
-#days =  ["Today", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-c1 = list(content.children)
+content = soup.find(id="detailed-forecast-body")
+#print(content)
 
-rp(c1)
+c1 = list(content.children)[1:-1]
 
-day_report = {'day':[], 'day_tag':[], 'high_temp_tag':[], 'high_temp':[], "fore_cast":[], 'low_temp_tag':[], 'low_temp':[]}
 
-forecast = ""
-for i, day in enumerate(c1):
-    if i%2 == 0:
-        day_name =  day.find('p')
-        day_report['day'].append(day_name.text)
-        day_report['day_tag'].append('p')
-        report =  day.find('img', alt=True)
-        forecast += report['alt']
-        high_temp_tag = day.find('p', class_="temp temp-high")
-        day_report['high_temp_tag'].append("temp temp-high")
-        high_temp = [int(x) for x in str(high_temp_tag).split(" ") if x.isnumeric()][0]
-        day_report['high_temp'].append(high_temp)
+scraped = {"day_name": [], "report": [], "temp": []}
+for child in c1:
+    day_name_locator = child.find('div', class_="col-sm-2 forecast-label")
+    day_name_tag = "b"
+    day_name = day_name_locator.find(day_name_tag).text
+    report = child.find('div', class_="col-sm-10 forecast-text").text
+    temp = [int(temp) for temp in report.replace(".", " ").split(" ") if temp.isnumeric()][0]
+    scraped["day_name"].append(day_name)
+    scraped["report"].append(report)
+    scraped["temp"].append(temp)
 
+groups = {}
+
+
+### For working out day and night indexes
+for x, day in enumerate(scraped.get('day_name')):
+    for y, night in enumerate(scraped.get('day_name')):
+        if day in night and day != night:
+            groups[day]=[x,y]
+
+    if day == 'Today' or day == 'This Afternoon':
+        if today in groups.keys():
+            groups[today].insert(0,x)
+        else:
+            groups[today] =[x,None]
+    elif day == 'Tonight':
+        if today in groups.keys():
+            groups[today].insert(1, x)
+        else:
+            groups[today] = [None, x]
+
+### Check for missing days of weeks that are missing data:
+for day in week_days:
+    if day not in groups.keys():
+        day_idx = scraped["day_name"].index(day)
+        groups[day] = [day_idx]
+
+
+
+### for consolodating the day and nights
+pd_data = {"day":[], "date":[],"high": [], "low": [], "day_report": [], "night_report": []}
+
+for day, data in groups.items():
+
+    if len(data) >= 2:
+        pd_data["day"].append(day)
+        pd_data["date"].append(get_date(day))
+        pd_data["high"].append(get_celcius(scraped["temp"][data[0]]))
+        pd_data["low"].append(get_celcius(scraped["temp"][data[1]]))
+        pd_data["day_report"].append(scraped.get("report")[data[0]])
+        pd_data["night_report"].append(scraped.get("report")[data[1]])
     else:
-        report =  day.find('img', alt=True)
-        forecast += ". " + report['alt']
-        day_report["fore_cast"].append(forecast)
-        forecast = ""
+        pd_data["day"].append(day)
+        pd_data["date"].append(get_date(day))
+        pd_data["high"].append(get_celcius(scraped["temp"][0]))
+        pd_data["low"].append(None)
+        pd_data["day_report"].append(scraped.get("report")[data[0]])
+        pd_data["night_report"].append(None)
 
-        low_temp_tag = day.find('p', class_="temp temp-low")
-        day_report['low_temp_tag'].append("temp temp-low")
-        low_temp = [int(x) for x in str(low_temp_tag).split(" ") if x.isnumeric()][0]
-        day_report['low_temp'].append(low_temp)
 
-for item in day_report.values():
-    print(item)
+for v in pd_data.values():
+    print(len(v))
+
+df = pd.DataFrame(pd_data)
+
+
+
+print(df)
