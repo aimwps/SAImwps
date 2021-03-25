@@ -77,7 +77,6 @@ for day in week_days:
 pd_data = {"day":[], "date":[],"high": [], "low": [], "day_report": [], "night_report": [], }
 
 for day, data in groups.items():
-
     if len(data) >= 2:
         pd_data["day"].append(day)
         pd_data["date"].append(get_date(day))
