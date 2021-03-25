@@ -4,11 +4,10 @@ import datetime as dt
 import pandas as pd
 import numpy as np
 
-
+df = None
 ## Matches the dates provided by weather.com format ("Wed 29") by finding
 ## the following 10 days dates from today and matching the "DD"
 def date_calculator(date):
-    print(date)
     today = dt.date.today()
     potential_dates = [today + dt.timedelta(days=i) for i in range(1,11)]
     date_day_str = [x for x in str(date).split() if x.isnumeric()][0]
@@ -51,7 +50,6 @@ for day in all_days:
             # use bs4. find() to find the tag and then the class inside the tag.
                 #
     pddata['wind_speed'].append(day.find('span', class_="Wind--windWrapper--1Va1P undefined").text)
-    pddata['rain_percent'].append([int(i) for i in str(day.select('span[data-testid="PercentageValue"]')) if i.isnumeric()][0])
     pddata['low_temp'].append(get_celcius(day.find('span', class_="DetailsSummary--lowTempValue--1DlJK").text))
     pddata['high_temp'].append(get_celcius(day.find('span', class_="DetailsSummary--highTempValue--3x6cL").text))
     pddata['date'].append(date_calculator(day.find('h2', class_="DetailsSummary--daypartName--1Mebr").text))
@@ -70,6 +68,5 @@ for day in all_days:
 check =[]
 for ls in pddata.values():
     check.append(len(ls))
-if count(check[0]) == len(check):
-# create the dataframe
+if check.count(check[0]) == len(check):
     df = pd.DataFrame(pddata)
