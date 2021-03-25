@@ -65,9 +65,11 @@ for day in all_days:
 
     pddata['rain_percent'].append([int(i) for i in str(day.select('span[data-testid="PercentageValue"]')) if i.isnumeric()][0])
 
+
+## for checking list size before creating dataframe
 check =[]
 for ls in pddata.values():
-
-
+    check.append(len(ls))
+if count(check[0]) == len(check):
 # create the dataframe
-df = pd.DataFrame(pddata)
+    df = pd.DataFrame(pddata)
