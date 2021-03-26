@@ -4,7 +4,6 @@ import datetime as dt
 import pandas as pd
 import numpy as np
 
-df = None
 ## Matches the dates provided by weather.com format ("Wed 29") by finding
 ## the following 10 days dates from today and matching the "DD"
 def date_calculator(date):
@@ -70,3 +69,5 @@ for ls in pddata.values():
     check.append(len(ls))
 if check.count(check[0]) == len(check):
     df = pd.DataFrame(pddata)
+
+print(df)
