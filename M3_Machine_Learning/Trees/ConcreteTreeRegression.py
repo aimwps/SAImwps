@@ -36,7 +36,14 @@ def concrete_settings_tester(mdi, mssi, msli):
                     if score > best_score[0]:
                         best_score = (score, c, md, mss, msl)
                         all_data.append((score, c, md, mss, msl))
-                    print(f"CBS: {round(best_score[0],2)} | Checking Criterion: {c}, {i+1}/2 | max_depth:{md}/{mdi}| Criterion: {c} | min_samples_split: {mss}/{mssi} | min_samples_leaf: {msl}/{msli}")
-    print(f"best_score: {best_score[0]}, Criterion:{best_score[1]} max_depth: {best_score[2]}, max_samples_split: {best_score[3]},  min_samples_leaf: {best_score[4]}")
+                    print(f"CBS: {round(best_score[0],2)} | Checking Criterion: {c}, {i+1}/2 | max_depth:{md}/{mdi} | Criterion: {c} | min_samples_split: {mss}/{mssi} | min_samples_leaf: {msl}/{msli}")
+    print(f"best_score: {best_score[0]}, Criterion:{best_score[1]}, max_depth: {best_score[2]}, max_samples_split: {best_score[3]},  min_samples_leaf: {best_score[4]}")
 
-concrete_settings_tester(12, 8, 5)
+#############################################################################################################
+# When run with the following settings, i got the best resut: ###############################################
+# concrete_settings_tester(12, 8, 5)                                                                        #
+# best_score: 0.9238560210315416, Criterion:mse max_depth: 12, max_samples_split: 3,  min_samples_leaf: 1   #
+#############################################################################################################
+
+
+def concrete_
